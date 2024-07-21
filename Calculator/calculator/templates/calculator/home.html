@@ -1,0 +1,159 @@
+<!-- calculator/templates/calculator/home.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .calculator {
+            width: 300px;
+            margin: 0 auto;
+            background-color: #2e2e2e;
+            border: 1px solid #333333;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            border-radius: 5px;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #333333;
+            border-radius: 3px;
+            font-size: 16px;
+            background-color: #333333;
+            color: #ffffff;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 3px;
+            background-color: #ff3860; /* Neon red */
+            color: #ffffff;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn:hover {
+            background-color: #ff1f4c; /* Darker neon red on hover */
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .error {
+            color: #ff3860; /* Neon red for error message */
+            font-weight: bold;
+        }
+        .history {
+            display: none; /* Initially hidden */
+            margin-top: 30px;
+            text-align: left;
+            padding: 10px;
+            border: 1px solid #333333;
+            border-radius: 5px;
+            background-color: #2e2e2e;
+        }
+        .history.show {
+            display: block; /* Show when .show class is added */
+        }
+        .history h2 {
+            color: #ff3860; /* Neon red */
+        }
+        .history ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .history li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1 style="color: #ff3860;">Base Calculator</h1>
+        <form id="calculatorForm" method="post" action="{% url 'calculate' %}">
+            {% csrf_token %}
+            <input type="text" id="expression" name="expression" placeholder="Enter calculation">
+            <br>
+            <button type="button" class="btn" onclick="addToExpression('1')">1</button>
+            <button type="button" class="btn" onclick="addToExpression('2')">2</button>
+            <button type="button" class="btn" onclick="addToExpression('3')">3</button>
+            <button type="button" class="btn" onclick="addToExpression('+')">+</button>
+            <br>
+            <button type="button" class="btn" onclick="addToExpression('4')">4</button>
+            <button type="button" class="btn" onclick="addToExpression('5')">5</button>
+            <button type="button" class="btn" onclick="addToExpression('6')">6</button>
+            <button type="button" class="btn" onclick="addToExpression('-')">-</button>
+            <br>
+            <button type="button" class="btn" onclick="addToExpression('7')">7</button>
+            <button type="button" class="btn" onclick="addToExpression('8')">8</button>
+            <button type="button" class="btn" onclick="addToExpression('9')">9</button>
+            <button type="button" class="btn" onclick="addToExpression('*')">*</button>
+            <br>
+            <button type="button" class="btn" onclick="addToExpression('0')">0</button>
+            <button type="button" class="btn" onclick="addToExpression('.')">.</button>
+            <button type="button" class="btn" onclick="clearExpression()">C</button>
+            <button type="button" class="btn" onclick="addToExpression('/')">/</button>
+            <br>
+            <button type="submit" class="btn">Calculate</button>
+        </form>
+        {% if result %}
+            <div class="result">Result: {{ result }}</div>
+            <p style="color: #ff3860;">Expression: {{ expression }}</p>
+        {% endif %}
+        {% if error_message %}
+            <p class="error">{{ error_message }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Toggle history button -->
+    <button type="button" class="btn" id="toggleHistoryBtn" onclick="toggleHistory()">Toggle History</button>
+
+    <!-- Download history button as PDF -->
+    <a href="{% url 'download_history' %}" class="btn">Download History as PDF</a>
+
+    <!-- Display history -->
+    <div class="history" id="historySection">
+        <h2>Calculation History</h2>
+        <ul>
+            {% for entry in history %}
+                <li>{{ entry.expression }} = {{ entry.result }} ({{ entry.created_at|date:"DATETIME_FORMAT" }})</li>
+            {% empty %}
+                <li>No calculations yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        function addToExpression(value) {
+            document.getElementById('expression').value += value;
+        }
+
+        function clearExpression() {
+            document.getElementById('expression').value = '';
+        }
+
+        function toggleHistory() {
+            var historySection = document.getElementById('historySection');
+            historySection.classList.toggle('show');
+        }
+    </script>
+</body>
+</html>
